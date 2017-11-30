@@ -1,37 +1,32 @@
 package main
 
 import (
-	"github.com/Shopify/sarama"
 	"fmt"
+	"time"
 )
 
 func main() {
-	config := sarama.NewConfig()
-	config.Producer.RequiredAcks = sarama.WaitForAll
-	config.Producer.Partitioner = sarama.NewHashPartitioner
-	config.Producer.Return.Successes = true
-	producer, e := sarama.NewAsyncProducer([]string{"192.168.233.143:9092"}, config)
-	if e != nil {
-		panic(e)
-	}
-	defer producer.AsyncClose()
-	msg := &sarama.ProducerMessage{
-		Topic:     "test-demo",
-		Partition: int32(2),
-		Key:       sarama.StringEncoder("key"),
-	}
+	ch := make(chan string,3)
+	go sendData(ch)
+	go getData(ch)
 
-	var value string
+	time.Sleep(5e9)
+}
+
+func sendData(ch chan string) {
+	ch <- "Washington"
+	ch <- "Tripoli"
+	fmt.Println("send first")
+	ch <- "London"
+	ch <- "Beijing"
+	ch <- "Tokio"
+}
+
+func getData(ch chan string) {
+	var input string
+	time.Sleep(2e9)
 	for {
-		fmt.Scanln(&value)
-		msg.Value = sarama.ByteEncoder(value)
-		fmt.Println(value)
-
-		producer.Input() <- msg
-
-		select {
-		case suc := <- producer.Successes():
-			fmt.Println("offset: ",suc.Offset,"timestamp: ",suc.Timestamp.String(),"partitions: ", suc.Partition)
-		}
+		input = <-ch
+		fmt.Printf("%s ", input)
 	}
 }

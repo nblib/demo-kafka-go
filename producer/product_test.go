@@ -18,9 +18,11 @@ func TestAsyn_Product(t *testing.T) {
 	config.Producer.Partitioner = sarama.NewRandomPartitioner
 	//是否等待成功后的响应
 	config.Producer.Return.Successes = true
+	config.Producer.Return.Errors = true
+	config.Version = sarama.V0_11_0_0
 
 	//使用配置,新建一个异步生产者
-	producer, e := sarama.NewAsyncProducer([]string{"192.168.233.143:9092"}, config)
+	producer, e := sarama.NewAsyncProducer([]string{"10.169.0.214:9092","10.169.0.218:9092","10.169.0.219:9092"}, config)
 	if e != nil {
 		panic(e)
 	}
@@ -28,7 +30,7 @@ func TestAsyn_Product(t *testing.T) {
 
 	//发送的消息,主题,key
 	msg := &sarama.ProducerMessage{
-		Topic: "test-demo",
+		Topic: "logstash_test",
 		Key:   sarama.StringEncoder("test"),
 	}
 
