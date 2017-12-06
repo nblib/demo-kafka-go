@@ -34,6 +34,7 @@ func TestConsumer(t *testing.T) {
 	}
 	defer partitionConsumer.Close()
 	//循环等待接受消息.
+
 	for {
 		select {
 		//接收消息通道和错误通道的内容.
@@ -53,16 +54,17 @@ func TestConsumerGroup(t *testing.T) {
 	config := cluster.NewConfig()
 	//接收失败通知
 	config.Consumer.Return.Errors = true
-
+	//默认从最新的开始消费,如果需要从头开始消费,使用这个设置
+	//config.Consumer.Offsets.Initial = sarama.OffsetOldest
 	// init consumer
 	brokers := []string{"10.169.0.214:9092"}
 	topics := []string{"logstash_test"}
 	consumer, err := cluster.NewConsumer(brokers, "my-consumer-group", topics, config)
+
 	if err != nil {
 		panic(err)
 	}
 	defer consumer.Close()
-
 	// 这个和消费者无关,作用为go的程序等待`ctrl+c`命令,停止程序
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt)
