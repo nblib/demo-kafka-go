@@ -51,8 +51,8 @@ func TestConsumer(t *testing.T) {
 func TestConsumerGroup(t *testing.T) {
 	// init (custom) config, enable errors and notifications
 	config := cluster.NewConfig()
+	//接收失败通知
 	config.Consumer.Return.Errors = true
-	config.Group.Return.Notifications = true
 
 	// init consumer
 	brokers := []string{"10.169.0.214:9092"}
@@ -63,9 +63,7 @@ func TestConsumerGroup(t *testing.T) {
 	}
 	defer consumer.Close()
 
-	consumer.MarkPartitionOffset()
-
-	// trap SIGINT to trigger a shutdown.
+	// 这个和消费者无关,作用为go的程序等待`ctrl+c`命令,停止程序
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt)
 
@@ -73,13 +71,6 @@ func TestConsumerGroup(t *testing.T) {
 	go func() {
 		for err := range consumer.Errors() {
 			log.Printf("Error: %s\n", err.Error())
-		}
-	}()
-
-	// consume notifications
-	go func() {
-		for ntf := range consumer.Notifications() {
-			log.Printf("Rebalanced: %+v\n", ntf)
 		}
 	}()
 
