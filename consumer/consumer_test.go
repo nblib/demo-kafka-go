@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"log"
 	"github.com/bsm/sarama-cluster"
+	"time"
 )
 
 /*
@@ -52,6 +53,8 @@ func TestConsumer(t *testing.T) {
 func TestConsumerGroup(t *testing.T) {
 	// init (custom) config, enable errors and notifications
 	config := cluster.NewConfig()
+	//设置每次提交Offset的时间间隔
+	config.Consumer.Offsets.CommitInterval = 10 * time.Second
 	//接收失败通知
 	config.Consumer.Return.Errors = true
 	//默认从最新的开始消费,如果需要从头开始消费,使用这个设置
